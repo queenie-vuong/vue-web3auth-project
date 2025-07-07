@@ -3,7 +3,7 @@ import { WEB3AUTH_NETWORK, CHAIN_NAMESPACES } from '@web3auth/base'
 import { WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter'
 
 const clientId = import.meta.env.VITE_WEB3AUTH_CLIENT_ID
-const walletConnectProjectId = '664e3875f4031f296da1a9bec088faa5'
+const walletConnectProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
 
 // Create WalletConnect V2 adapter
 const walletConnectV2Adapter = new WalletConnectV2Adapter({
