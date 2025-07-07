@@ -51,8 +51,7 @@ export const createWalletConnectModal = async () => {
         analytics: true,
         onramp: true,
         socials: ['google'],
-        email: true,
-        emailShowWallets: true
+        email: false
       },
       themeMode: 'light',
       featuredWalletIds: [
