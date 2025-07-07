@@ -1,28 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { WEB3AUTH_NETWORK, CHAIN_NAMESPACES } from '@web3auth/base'
-import { WalletConnectV2Adapter } from '@web3auth/wallet-connect-v2-adapter'
+import { OpenloginAdapter } from '@web3auth/openlogin-adapter'
 
 const clientId = import.meta.env.VITE_WEB3AUTH_CLIENT_ID
-const walletConnectProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
 
-// Create WalletConnect V2 adapter
-const walletConnectV2Adapter = new WalletConnectV2Adapter({
+// Create OpenLogin adapter with Google-only configuration
+const openloginAdapter = new OpenloginAdapter({
   adapterSettings: {
-    qrcodeModal: {
-      mobileLinks: [
-        "rainbow",
-        "metamask",
-        "argent",
-        "trust",
-        "imtoken",
-        "pillar",
-      ],
+    uxMode: "popup",
+    whiteLabel: {
+      appName: "Vue Web3Auth Project",
+      logoLight: "https://web3auth.io/images/web3auth-logo.svg",
+      logoDark: "https://web3auth.io/images/web3auth-logo---Dark.svg",
+      defaultLanguage: "en",
+      mode: "light",
+    },
+    loginConfig: {
+      google: {
+        name: "Google Login",
+        verifier: "google",
+        typeOfLogin: "google",
+        showOnModal: true,
+      },
     },
   },
-  loginSettings: {
-    projectId: walletConnectProjectId,
-  },
-} as any) // Using 'as any' to bypass TypeScript issues with the adapter types
+})
 
 export const web3AuthContextConfig = {
   web3AuthOptions: {
@@ -30,8 +31,12 @@ export const web3AuthContextConfig = {
     web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     chainConfig: {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-      chainId: "0x1",
-      rpcTarget: "https://eth.llamarpc.com",
+      chainId: "0x14a34", // Base Sepolia (84532)
+      rpcTarget: "https://sepolia.base.org",
+      displayName: "Base Sepolia",
+      blockExplorer: "https://sepolia.basescan.org",
+      ticker: "ETH",
+      tickerName: "Ethereum",
     },
     uiConfig: {
       appName: "Vue Web3Auth Project",
@@ -40,20 +45,20 @@ export const web3AuthContextConfig = {
       },
       defaultLanguage: "en" as const,
       mode: "light" as const,
-      loginMethodsOrder: ["google", "facebook", "twitter", "discord", "email_passwordless", "wallet_connect_v2"],
+      loginMethodsOrder: ["google"],
       useLogoLoader: true
     },
     modalConfig: {
       connectors: {
         metamask: {
           label: 'Metamask',
-          showOnModal: true,
+          showOnModal: false,
         },
-        'wallet-connect-v2': { label: 'Wallet Connect v2', showOnModal: true },
+        'wallet-connect-v2': { label: 'Wallet Connect v2', showOnModal: false },
         coinbase: { label: 'coinbase', showOnModal: false },
-        auth: { label: 'Auth', showOnModal: true },
+        auth: { label: 'Social Login', showOnModal: true },
       },
     },
   },
-  adapters: [walletConnectV2Adapter],
+  adapters: [openloginAdapter],
 }
