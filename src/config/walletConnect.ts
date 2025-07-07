@@ -49,7 +49,10 @@ export const createWalletConnectModal = async () => {
       defaultNetwork: baseSepolia,
       features: {
         analytics: true,
-        onramp: true
+        onramp: true,
+        socials: ['google'],
+        email: true,
+        emailShowWallets: true
       },
       themeMode: 'light',
       featuredWalletIds: [

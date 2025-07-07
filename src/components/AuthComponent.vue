@@ -126,7 +126,7 @@ const web3authUser = useWeb3AuthUser()
 watch([address, chainId, isConnected], async ([newAddress, newChainId, newIsConnected]) => {
   if (newIsConnected && newAddress) {
     let finalChainId = newChainId || 1
-    
+
     // Force Base Sepolia in dev environment
     if (import.meta.env.DEV && finalChainId !== 84532) {
       console.log('Dev environment: Switching Web3Auth to Base Sepolia...')
@@ -134,6 +134,7 @@ watch([address, chainId, isConnected], async ([newAddress, newChainId, newIsConn
         // Get the Web3Auth provider and switch chain
         const web3authProvider = await connector.value?.getProvider?.()
         if (web3authProvider && typeof web3authProvider === 'object' && 'request' in web3authProvider) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await (web3authProvider as any).request({
             method: 'wallet_switchEthereumChain',
             params: [{ chainId: '0x14a34' }] // Base Sepolia
@@ -146,6 +147,7 @@ watch([address, chainId, isConnected], async ([newAddress, newChainId, newIsConn
         try {
           const web3authProvider = await connector.value?.getProvider?.()
           if (web3authProvider && typeof web3authProvider === 'object' && 'request' in web3authProvider) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             await (web3authProvider as any).request({
               method: 'wallet_addEthereumChain',
               params: [{
@@ -167,7 +169,7 @@ watch([address, chainId, isConnected], async ([newAddress, newChainId, newIsConn
         }
       }
     }
-    
+
     walletStore.setWalletState({
       address: newAddress,
       chainId: finalChainId,

@@ -55,25 +55,24 @@ const walletStore = useWalletStore()
             <!-- Show connection options when not connected -->
             <div v-else class="mb-8">
               <h1 class="text-3xl font-bold text-gray-900 text-center mb-8">
-                Choose Your Connection Method
+                Connect Your Wallet
               </h1>
               
-              <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Web3Auth Section -->
-                <div>
-                  <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-                    Web3Auth (Social Login)
-                  </h2>
-                  <AuthComponent />
-                </div>
-                
-                <!-- WalletConnect Section -->
-                <div>
-                  <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
-                    WalletConnect (Direct Wallet)
-                  </h2>
-                  <WalletConnectComponent />
-                </div>
+              <div class="max-w-md mx-auto">
+                <!-- Unified WalletConnect Component (supports both wallets and Google) -->
+                <WalletConnectComponent />
+              </div>
+              
+              <!-- Alternative: Keep Web3Auth as backup (hidden by default) -->
+              <div class="mt-8 max-w-md mx-auto" style="display: none;">
+                <details class="cursor-pointer">
+                  <summary class="text-sm text-gray-600 text-center hover:text-gray-800">
+                    Alternative: Web3Auth (Google Only)
+                  </summary>
+                  <div class="mt-4">
+                    <AuthComponent />
+                  </div>
+                </details>
               </div>
             </div>
             

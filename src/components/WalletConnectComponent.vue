@@ -1,7 +1,7 @@
 <template>
   <!-- Hide when Web3Auth is active -->
   <div v-if="!walletStore.isWeb3AuthConnected" class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
-    <h2 class="text-2xl font-bold text-gray-900 mb-4">WalletConnect</h2>
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Connect Wallet</h2>
     
     <!-- Connection Status -->
     <div v-if="isConnected && account" class="mb-6">
@@ -59,13 +59,14 @@
         :disabled="isConnecting"
         class="w-full px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
       >
-        {{ isConnecting ? 'Opening Wallet Modal...' : 'Connect with WalletConnect' }}
+        {{ isConnecting ? 'Opening Connection Modal...' : 'Connect Wallet or Google' }}
       </button>
       
       <div class="text-sm text-gray-600 text-center">
-        <p class="mb-2">Connect your wallet using WalletConnect.</p>
+        <p class="mb-2">Choose your connection method:</p>
+        <p><strong>Wallets:</strong> MetaMask, Trust Wallet, Rainbow, Coinbase</p>
+        <p><strong>Social:</strong> Sign in with Google email</p>
         <p><strong>Mobile:</strong> Scan QR code with your wallet app</p>
-        <p><strong>Desktop:</strong> Select from available wallet extensions</p>
       </div>
     </div>
     
