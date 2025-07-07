@@ -27,7 +27,8 @@ export const createWalletConnectModal = async () => {
       : [baseSepolia, mainnet, sepolia]
     
     wagmiAdapter = new WagmiAdapter({
-      networks: networks,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      networks: networks as any,
       projectId
     })
     
@@ -43,7 +44,8 @@ export const createWalletConnectModal = async () => {
       adapters: [wagmiAdapter],
       projectId,
       metadata: walletConnectMetadata,
-      networks: networks,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      networks: networks as any,
       defaultNetwork: baseSepolia,
       features: {
         analytics: true,
