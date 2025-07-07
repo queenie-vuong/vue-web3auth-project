@@ -5,7 +5,14 @@ import { WagmiProvider } from '@web3auth/modal/vue/wagmi'
 import { web3AuthContextConfig } from './web3authContext'
 import { config } from './wagmiConfig'
 import AuthComponent from './components/AuthComponent.vue'
+import WalletConnectComponent from './components/WalletConnectComponent.vue'
+import UserInfo from './components/UserInfo.vue'
 import CookieSettings from './components/CookieSettings.vue'
+import { useWalletStore } from './stores/wallet'
+// Import test script for debugging
+import './test-walletconnect'
+
+const walletStore = useWalletStore()
 </script>
 
 <template>
@@ -40,7 +47,36 @@ import CookieSettings from './components/CookieSettings.vue'
 
         <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div class="px-4 py-6 sm:px-0">
-            <AuthComponent />
+            <!-- Show UserInfo when connected -->
+            <div v-if="walletStore.isConnected" class="mb-8">
+              <UserInfo />
+            </div>
+            
+            <!-- Show connection options when not connected -->
+            <div v-else class="mb-8">
+              <h1 class="text-3xl font-bold text-gray-900 text-center mb-8">
+                Choose Your Connection Method
+              </h1>
+              
+              <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Web3Auth Section -->
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+                    Web3Auth (Google Login)
+                  </h2>
+                  <AuthComponent />
+                </div>
+                
+                <!-- WalletConnect Section -->
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+                    WalletConnect (Wallets + Google)
+                  </h2>
+                  <WalletConnectComponent />
+                </div>
+              </div>
+            </div>
+            
             <RouterView />
           </div>
         </main>

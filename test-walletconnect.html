@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WalletConnect Test</title>
+</head>
+<body>
+  <h1>WalletConnect Debug Test</h1>
+  <p>Open the browser console and navigate to <a href="http://localhost:5173">http://localhost:5173</a></p>
+  
+  <h2>Test Steps:</h2>
+  <ol>
+    <li>Open browser console (F12)</li>
+    <li>Click "Connect with WalletConnect" button</li>
+    <li>Watch console logs for state updates</li>
+    <li>Connect your wallet</li>
+    <li>Check if Web3Auth component hides</li>
+    <li>Check if UserInfo component shows</li>
+  </ol>
+  
+  <h2>Debug Commands (run in console):</h2>
+  <pre>
+// Test WalletConnect connection
+await window.testWalletConnect()
+
+// Check store state
+const store = document.querySelector('#app').__vueApp__.config.globalProperties.$pinia._s.get('wallet')
+console.log('Wallet store state:', {
+  address: store.address,
+  connectionType: store.connectionType,
+  isConnected: store.isConnected,
+  isWalletConnectConnected: store.isWalletConnectConnected,
+  isWeb3AuthConnected: store.isWeb3AuthConnected
+})
+  </pre>
+</body>
+</html>

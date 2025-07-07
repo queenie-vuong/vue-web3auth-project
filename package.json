@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5174",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -12,9 +12,13 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@reown/appkit": "^1.7.12",
+    "@reown/appkit-adapter-wagmi": "^1.7.12",
     "@tanstack/vue-query": "^5.81.5",
     "@wagmi/core": "^2.17.3",
     "@wagmi/vue": "^0.1.22",
+    "@walletconnect/sign-client": "^2.21.4",
+    "@walletconnect/universal-provider": "^2.21.4",
     "@web3auth/base": "^9.7.0",
     "@web3auth/ethereum-provider": "^9.7.0",
     "@web3auth/modal": "^10.0.5",
