@@ -5,12 +5,13 @@ import { WagmiProvider } from '@web3auth/modal/vue/wagmi'
 import { web3AuthContextConfig } from './web3authContext'
 import { config } from './wagmiConfig'
 import AuthComponent from './components/AuthComponent.vue'
+import CookieSettings from './components/CookieSettings.vue'
 </script>
 
 <template>
   <Web3AuthProvider :config="web3AuthContextConfig">
     <WagmiProvider :wagmi-config="config">
-      <div class="min-h-screen bg-gray-100">
+      <div class="min-h-screen bg-gray-100 flex flex-col">
         <header class="bg-white shadow-sm">
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -43,6 +44,15 @@ import AuthComponent from './components/AuthComponent.vue'
             <RouterView />
           </div>
         </main>
+        
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+              <p class="text-sm text-gray-500">&copy; 2024 Vue Web3Auth. All rights reserved.</p>
+              <CookieSettings />
+            </div>
+          </div>
+        </footer>
       </div>
     </WagmiProvider>
   </Web3AuthProvider>
