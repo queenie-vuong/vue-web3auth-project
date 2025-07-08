@@ -52,9 +52,9 @@ export const web3AuthContextConfig = {
       connectors: {
         metamask: {
           label: 'Metamask',
-          showOnModal: false,
+          showOnModal: true,
         },
-        'wallet-connect-v2': { label: 'Wallet Connect v2', showOnModal: false },
+        'wallet-connect-v2': { label: 'Wallet Connect v2', showOnModal: true },
         coinbase: { label: 'coinbase', showOnModal: false },
         auth: { label: 'Social Login', showOnModal: true },
       },
