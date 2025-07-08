@@ -19,19 +19,19 @@ export const createWalletConnectModal = async () => {
     const { createAppKit } = await import('@reown/appkit')
     const { mainnet, sepolia, baseSepolia } = await import('@reown/appkit/networks')
     const { WagmiAdapter } = await import('@reown/appkit-adapter-wagmi')
-    
+
     // Create wagmi adapter with Base Sepolia as the default network
     // In dev environment, only allow Base Sepolia
-    const networks = import.meta.env.DEV 
-      ? [baseSepolia] 
+    const networks = import.meta.env.DEV
+      ? [baseSepolia]
       : [baseSepolia, mainnet, sepolia]
-    
+
     wagmiAdapter = new WagmiAdapter({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       networks: networks as any,
       projectId
     })
-    
+
     // Subscribe to wagmi events
     wagmiAdapter.wagmiConfig.subscribe(
       (state) => state,
@@ -39,7 +39,7 @@ export const createWalletConnectModal = async () => {
         console.log('Wagmi state update:', state)
       }
     )
-    
+
     appKit = createAppKit({
       adapters: [wagmiAdapter],
       projectId,
@@ -56,10 +56,13 @@ export const createWalletConnectModal = async () => {
       themeMode: 'light',
       featuredWalletIds: [
         'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-        '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
-        '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
-        'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase Wallet
-      ]
+        '18450873f2910f5596a63430197e3c1613ab1385ada74a4963a62eec43bc381b', // Rabby
+      ],
+      includeWalletIds: [
+        'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+        '18450873f2910f5596a63430197e3c1613ab1385ada74a4963a62eec43bc381b', // Rabby
+      ],
+      allWallets: 'HIDE'
     })
   }
   return appKit
