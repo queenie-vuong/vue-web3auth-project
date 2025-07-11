@@ -1,5 +1,6 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, computed } from 'vue'
 import { createWalletConnectModal, getWagmiAdapter } from '@/config/walletConnect'
+import { useWalletStore } from '@/stores/wallet'
 import type { AppKit } from '@reown/appkit'
 import type { PublicStateControllerState } from '@reown/appkit-controllers'
 import type { State as WagmiState } from '@wagmi/core'
@@ -13,10 +14,39 @@ interface WalletConnectAccount {
 let appKitInstance: AppKit | null = null
 
 export function useWalletConnect() {
+  const walletStore = useWalletStore()
   const isConnecting = ref(false)
   const isConnected = ref(false)
   const account = ref<WalletConnectAccount | null>(null)
   const error = ref<string | null>(null)
+
+  // Helper function to update both local state and wallet store
+  const updateConnectionState = (accountData: WalletConnectAccount) => {
+    account.value = accountData
+    isConnected.value = true
+    
+    // Update wallet store
+    walletStore.setWalletState({
+      address: accountData.address,
+      chainId: accountData.chainId,
+      connectionType: 'walletconnect'
+    })
+    
+    console.log('Updated connection state:', accountData)
+  }
+
+  // Helper function to clear connection state
+  const clearConnectionState = () => {
+    account.value = null
+    isConnected.value = false
+    
+    // Clear wallet store if it was WalletConnect connection
+    if (walletStore.connectionType === 'walletconnect') {
+      walletStore.clearWalletState()
+    }
+    
+    console.log('Cleared connection state')
+  }
 
   const initializeWalletConnect = async () => {
     if (appKitInstance) {
@@ -27,11 +57,10 @@ export function useWalletConnect() {
         if (wagmiState?.current && wagmiState.connections?.size) {
           const activeConnection = wagmiState.connections.get(wagmiState.current)
           if (activeConnection?.accounts && activeConnection.accounts.length > 0) {
-            account.value = {
+            updateConnectionState({
               address: activeConnection.accounts[0],
               chainId: activeConnection.chainId || 1
-            }
-            isConnected.value = true
+            })
           }
         }
       }
@@ -64,8 +93,7 @@ export function useWalletConnect() {
             const wagmiState = adapter.wagmiConfig.state
             if (!wagmiState?.current || !wagmiState.connections?.size) {
               console.log('Modal closed and no active connection - disconnecting')
-              account.value = null
-              isConnected.value = false
+              clearConnectionState()
             }
           }
         }
@@ -84,18 +112,16 @@ export function useWalletConnect() {
             const activeConnection = wagmiState.connections.get(wagmiState.current)
             if (activeConnection?.accounts && activeConnection.accounts.length > 0) {
               console.log('Found account in wagmi subscription:', activeConnection.accounts[0])
-              account.value = {
+              updateConnectionState({
                 address: activeConnection.accounts[0],
                 chainId: activeConnection.chainId || 1
-              }
-              isConnected.value = true
+              })
             }
           } else {
             // No active connection
             if (isConnected.value) {
               console.log('Lost connection in wagmi subscription')
-              account.value = null
-              isConnected.value = false
+              clearConnectionState()
             }
           }
         }
@@ -158,26 +184,14 @@ export function useWalletConnect() {
             
             if (activeConnection?.accounts && activeConnection.accounts.length > 0) {
               const address = activeConnection.accounts[0]
-              let chainId = activeConnection.chainId || 1
+              const chainId = activeConnection.chainId || 1
               
               console.log('Found connected account:', { address, chainId })
               
-              // Force Base Sepolia in dev environment
-              if (import.meta.env.DEV && chainId !== 84532) {
-                console.log('Dev environment: Switching to Base Sepolia...')
-                try {
-                  await switchChain(84532)
-                  chainId = 84532
-                } catch (err) {
-                  console.error('Failed to switch to Base Sepolia:', err)
-                }
-              }
-              
-              account.value = {
+              updateConnectionState({
                 address: address,
                 chainId: chainId
-              }
-              isConnected.value = true
+              })
               clearInterval(checkConnection)
               return
             }
@@ -213,7 +227,7 @@ export function useWalletConnect() {
         await appKitInstance.disconnect()
       }
       
-      resetConnection()
+      clearConnectionState()
       
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to disconnect'
@@ -297,9 +311,69 @@ export function useWalletConnect() {
     }
   }
 
-  const resetConnection = () => {
-    account.value = null
-    isConnected.value = false
+
+  const autoReconnect = async () => {
+    try {
+      console.log('Attempting auto-reconnect...')
+      
+      // Initialize WalletConnect if not already done
+      if (!appKitInstance) {
+        await initializeWalletConnect()
+      }
+
+      // Try to use Wagmi's reconnect functionality
+      const adapter = getWagmiAdapter()
+      if (adapter && adapter.wagmiConfig) {
+        try {
+          const { reconnect } = await import('@wagmi/core')
+          const connections = await reconnect(adapter.wagmiConfig)
+          
+          if (connections && connections.length > 0) {
+            const activeConnection = connections[0]
+            if (activeConnection.accounts && activeConnection.accounts.length > 0) {
+              console.log('Wagmi auto-reconnected successfully:', activeConnection)
+              
+              updateConnectionState({
+                address: activeConnection.accounts[0],
+                chainId: activeConnection.chainId || 1
+              })
+              
+              console.log('Auto-reconnected successfully:', account.value)
+              return true
+            }
+          }
+        } catch (wagmiError) {
+          console.log('Wagmi reconnect failed, trying manual check:', wagmiError)
+          
+          // Fallback to manual check if Wagmi reconnect fails
+          const wagmiState = adapter.wagmiConfig.state
+          if (wagmiState?.connections?.size) {
+            for (const [connectorId, connection] of wagmiState.connections) {
+              if (connection.accounts && connection.accounts.length > 0) {
+                console.log('Found cached connection:', { connectorId, connection })
+                
+                // Set the current connection
+                wagmiState.current = connectorId
+                
+                updateConnectionState({
+                  address: connection.accounts[0],
+                  chainId: connection.chainId || 1
+                })
+                
+                console.log('Auto-reconnected successfully via fallback:', account.value)
+                return true
+              }
+            }
+          }
+        }
+      }
+      
+      console.log('No cached connection found')
+      return false
+    } catch (error) {
+      console.error('Auto-reconnect failed:', error)
+      return false
+    }
   }
 
   // Cleanup on unmount
@@ -307,8 +381,11 @@ export function useWalletConnect() {
     // AppKit handles its own cleanup
   })
 
-  // Initialize on first use
-  initializeWalletConnect()
+  // Initialize on first use and attempt auto-reconnect
+  initializeWalletConnect().then(() => {
+    // After initialization, try auto-reconnect
+    autoReconnect()
+  })
 
   return {
     // State
@@ -324,6 +401,7 @@ export function useWalletConnect() {
     signMessage,
     switchChain,
     getProvider,
+    autoReconnect,
     
     // Computed
     currentChain: () => {
@@ -331,10 +409,24 @@ export function useWalletConnect() {
       const chainNames = {
         84532: { name: 'Base Sepolia', currency: 'ETH' },
         1: { name: 'Ethereum', currency: 'ETH' },
-        11155111: { name: 'Sepolia', currency: 'ETH' }
+        11155111: { name: 'Sepolia', currency: 'ETH' },
+        998: { name: 'HyperEVM Testnet', currency: 'ETH' }
       }
-      return chainNames[account.value.chainId as keyof typeof chainNames] || null
+      return chainNames[account.value.chainId as keyof typeof chainNames] || { name: `Chain ${account.value.chainId}`, currency: 'Unknown' }
     },
+    
+    // Connector for network switching
+    connector: computed(() => {
+      const adapter = getWagmiAdapter()
+      if (!adapter?.wagmiConfig?.state?.current) return undefined
+      
+      const wagmiState = adapter.wagmiConfig.state
+      const currentConnectorId = wagmiState.current
+      if (!currentConnectorId) return undefined
+      
+      const currentConnection = wagmiState.connections.get(currentConnectorId)
+      return currentConnection?.connector
+    }),
     
     // Debug helpers
     _debug: {

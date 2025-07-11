@@ -120,7 +120,8 @@ const {
   disconnect,
   sendTransaction,
   signMessage,
-  currentChain
+  currentChain,
+  autoReconnect
 } = useWalletConnect()
 
 const isSigningMessage = ref(false)
@@ -128,8 +129,8 @@ const isSendingTransaction = ref(false)
 const lastTransactionHash = ref('')
 const lastSignature = ref('')
 
-// Debug logging on mount
-onMounted(() => {
+// Auto-reconnect on mount
+onMounted(async () => {
   console.log('WalletConnectComponent mounted')
   console.log('Initial isConnected:', isConnected.value)
   console.log('Initial account:', account.value)
@@ -138,6 +139,12 @@ onMounted(() => {
     connectionType: walletStore.connectionType,
     isConnected: walletStore.isConnected
   })
+
+  // Attempt auto-reconnect if not already connected
+  if (!isConnected.value) {
+    console.log('Attempting auto-reconnect on mount...')
+    await autoReconnect()
+  }
 })
 
 // Watch for account changes and update wallet store
