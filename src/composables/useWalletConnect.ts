@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, computed } from 'vue'
 import { createWalletConnectModal, getWagmiAdapter } from '@/config/walletConnect'
 import { useWalletStore } from '@/stores/wallet'
 import type { AppKit } from '@reown/appkit'
@@ -184,20 +184,9 @@ export function useWalletConnect() {
             
             if (activeConnection?.accounts && activeConnection.accounts.length > 0) {
               const address = activeConnection.accounts[0]
-              let chainId = activeConnection.chainId || 1
+              const chainId = activeConnection.chainId || 1
               
               console.log('Found connected account:', { address, chainId })
-              
-              // Force Base Sepolia in dev environment
-              if (import.meta.env.DEV && chainId !== 84532) {
-                console.log('Dev environment: Switching to Base Sepolia...')
-                try {
-                  await switchChain(84532)
-                  chainId = 84532
-                } catch (err) {
-                  console.error('Failed to switch to Base Sepolia:', err)
-                }
-              }
               
               updateConnectionState({
                 address: address,
@@ -420,10 +409,24 @@ export function useWalletConnect() {
       const chainNames = {
         84532: { name: 'Base Sepolia', currency: 'ETH' },
         1: { name: 'Ethereum', currency: 'ETH' },
-        11155111: { name: 'Sepolia', currency: 'ETH' }
+        11155111: { name: 'Sepolia', currency: 'ETH' },
+        998: { name: 'HyperEVM Testnet', currency: 'ETH' }
       }
-      return chainNames[account.value.chainId as keyof typeof chainNames] || null
+      return chainNames[account.value.chainId as keyof typeof chainNames] || { name: `Chain ${account.value.chainId}`, currency: 'Unknown' }
     },
+    
+    // Connector for network switching
+    connector: computed(() => {
+      const adapter = getWagmiAdapter()
+      if (!adapter?.wagmiConfig?.state?.current) return undefined
+      
+      const wagmiState = adapter.wagmiConfig.state
+      const currentConnectorId = wagmiState.current
+      if (!currentConnectorId) return undefined
+      
+      const currentConnection = wagmiState.connections.get(currentConnectorId)
+      return currentConnection?.connector
+    }),
     
     // Debug helpers
     _debug: {

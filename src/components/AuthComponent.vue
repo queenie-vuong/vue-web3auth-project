@@ -125,50 +125,7 @@ const web3authUser = useWeb3AuthUser()
 // Watch for account changes and update wallet store
 watch([address, chainId, isConnected], async ([newAddress, newChainId, newIsConnected]) => {
   if (newIsConnected && newAddress) {
-    let finalChainId = newChainId || 1
-
-    // Force Base Sepolia in dev environment
-    if (import.meta.env.DEV && finalChainId !== 84532) {
-      console.log('Dev environment: Switching Web3Auth to Base Sepolia...')
-      try {
-        // Get the Web3Auth provider and switch chain
-        const web3authProvider = await connector.value?.getProvider?.()
-        if (web3authProvider && typeof web3authProvider === 'object' && 'request' in web3authProvider) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await (web3authProvider as any).request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x14a34' }] // Base Sepolia
-          })
-          finalChainId = 84532
-        }
-      } catch (err) {
-        console.error('Failed to switch Web3Auth to Base Sepolia:', err)
-        // If switch fails, try to add the network
-        try {
-          const web3authProvider = await connector.value?.getProvider?.()
-          if (web3authProvider && typeof web3authProvider === 'object' && 'request' in web3authProvider) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            await (web3authProvider as any).request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x14a34',
-                chainName: 'Base Sepolia',
-                nativeCurrency: {
-                  name: 'Ethereum',
-                  symbol: 'ETH',
-                  decimals: 18
-                },
-                rpcUrls: ['https://sepolia.base.org'],
-                blockExplorerUrls: ['https://sepolia.basescan.org']
-              }]
-            })
-            finalChainId = 84532
-          }
-        } catch (addErr) {
-          console.error('Failed to add Base Sepolia to Web3Auth:', addErr)
-        }
-      }
-    }
+    const finalChainId = newChainId || 1
 
     walletStore.setWalletState({
       address: newAddress,

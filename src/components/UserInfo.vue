@@ -30,7 +30,7 @@
           <div>
             <p class="text-sm font-medium text-gray-500">Balance</p>
             <p class="mt-1 text-lg font-semibold text-gray-900">
-              {{ formattedBalance }} {{ walletStore.currentNetwork?.currency || 'ETH' }}
+              {{ formattedBalance }} {{ walletStore.currentNetwork?.ticker || 'ETH' }}
             </p>
           </div>
           <button

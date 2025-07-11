@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { getNetworkByDecimalId, type NetworkConfig } from '@/config/networks'
 
 export type ConnectionType = 'web3auth' | 'walletconnect' | null
 
@@ -28,18 +29,23 @@ export const useWalletStore = defineStore('wallet', () => {
     return connectionType.value === 'walletconnect'
   })
 
-  const currentNetwork = computed(() => {
+  const currentNetwork = computed<NetworkConfig | null>(() => {
     if (!chainId.value) return null
     
-    const networks: Record<number, { name: string; currency: string }> = {
-      84532: { name: 'Base Sepolia', currency: 'ETH' },
-      1: { name: 'Ethereum Mainnet', currency: 'ETH' },
-      11155111: { name: 'Sepolia Testnet', currency: 'ETH' },
-      137: { name: 'Polygon', currency: 'MATIC' },
-      80001: { name: 'Mumbai', currency: 'MATIC' }
-    }
+    const network = getNetworkByDecimalId(chainId.value)
+    if (network) return network
     
-    return networks[chainId.value] || { name: `Chain ${chainId.value}`, currency: 'Unknown' }
+    // Fallback for unknown networks
+    return {
+      chainId: `0x${chainId.value.toString(16)}`,
+      chainIdDecimal: chainId.value,
+      name: `chain-${chainId.value}`,
+      displayName: `Chain ${chainId.value}`,
+      rpcUrl: '',
+      blockExplorer: '',
+      ticker: 'Unknown',
+      tickerName: 'Unknown'
+    }
   })
 
   const setWalletState = (state: Partial<WalletState>) => {

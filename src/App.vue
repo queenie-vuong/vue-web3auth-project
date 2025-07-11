@@ -8,6 +8,7 @@ import AuthComponent from './components/AuthComponent.vue'
 import WalletConnectComponent from './components/WalletConnectComponent.vue'
 import UserInfo from './components/UserInfo.vue'
 import CookieSettings from './components/CookieSettings.vue'
+import NetworkSwitcher from './components/NetworkSwitcher.vue'
 import { useWalletStore } from './stores/wallet'
 // Import test script for debugging
 import './test-walletconnect'
@@ -49,7 +50,10 @@ const walletStore = useWalletStore()
           <div class="px-4 py-6 sm:px-0">
             <!-- Show UserInfo when connected -->
             <div v-if="walletStore.isConnected" class="mb-8">
-              <UserInfo />
+              <div class="flex justify-between items-start">
+                <UserInfo class="flex-1" />
+                <NetworkSwitcher class="ml-4" />
+              </div>
             </div>
             
             <!-- Show connection options when not connected -->

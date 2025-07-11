@@ -17,14 +17,26 @@ export const createWalletConnectModal = async () => {
   if (!appKit) {
     // Dynamic import to avoid SSR issues
     const { createAppKit } = await import('@reown/appkit')
-    const { mainnet, sepolia, baseSepolia } = await import('@reown/appkit/networks')
+    const { mainnet, sepolia, baseSepolia, base, polygon, arbitrum, optimism } = await import('@reown/appkit/networks')
     const { WagmiAdapter } = await import('@reown/appkit-adapter-wagmi')
 
-    // Create wagmi adapter with Base Sepolia as the default network
-    // In dev environment, only allow Base Sepolia
-    const networks = import.meta.env.DEV
-      ? [baseSepolia]
-      : [baseSepolia, mainnet, sepolia]
+    // Define HyperEVM testnet as a custom network
+    const hyperevmTestnet = {
+      id: 998,
+      name: 'HyperEVM Testnet',
+      nativeCurrency: { name: 'HyperEVM ETH', symbol: 'ETH', decimals: 18 },
+      rpcUrls: {
+        default: { http: ['https://rpc.hyperliquid-testnet.xyz/evm'] },
+        public: { http: ['https://rpc.hyperliquid-testnet.xyz/evm'] }
+      },
+      blockExplorers: {
+        default: { name: 'HyperEVM Explorer', url: 'https://explorer.hyperliquid-testnet.xyz' }
+      },
+      testnet: true
+    }
+
+    // Create wagmi adapter with all supported networks
+    const networks = [baseSepolia, mainnet, sepolia, base, polygon, arbitrum, optimism, hyperevmTestnet]
 
     wagmiAdapter = new WagmiAdapter({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,5 +110,40 @@ export const supportedChains = {
     currency: 'ETH',
     explorerUrl: 'https://sepolia.etherscan.io',
     rpcUrl: 'https://rpc.sepolia.org'
+  },
+  8453: {
+    chainId: 8453,
+    name: 'Base',
+    currency: 'ETH',
+    explorerUrl: 'https://basescan.org',
+    rpcUrl: 'https://mainnet.base.org'
+  },
+  137: {
+    chainId: 137,
+    name: 'Polygon',
+    currency: 'MATIC',
+    explorerUrl: 'https://polygonscan.com',
+    rpcUrl: 'https://polygon-rpc.com'
+  },
+  42161: {
+    chainId: 42161,
+    name: 'Arbitrum One',
+    currency: 'ETH',
+    explorerUrl: 'https://arbiscan.io',
+    rpcUrl: 'https://arb1.arbitrum.io/rpc'
+  },
+  10: {
+    chainId: 10,
+    name: 'Optimism',
+    currency: 'ETH',
+    explorerUrl: 'https://optimistic.etherscan.io',
+    rpcUrl: 'https://mainnet.optimism.io'
+  },
+  998: {
+    chainId: 998,
+    name: 'HyperEVM Testnet',
+    currency: 'ETH',
+    explorerUrl: 'https://explorer.hyperliquid-testnet.xyz',
+    rpcUrl: 'https://rpc.hyperliquid-testnet.xyz/evm'
   }
 }
